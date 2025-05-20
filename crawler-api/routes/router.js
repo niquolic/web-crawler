@@ -2,15 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { sendToQueue } = require('../services/messaging');
 const urlService = require('../services/urlService');
+const cacheService = require('../services/cacheService');
 const amqplib = require('amqplib');
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 
-// Map pour stocker les promesses de résultats
 const pendingResults = new Map();
 
-// Fonction pour consommer les résultats du crawler
 async function consumeResults() {
   const conn = await amqplib.connect(process.env.RABBITMQ_URL || 'amqp://localhost');
   const channel = await conn.createChannel();
@@ -29,7 +28,6 @@ async function consumeResults() {
   });
 }
 
-// Démarrer la consommation des résultats
 consumeResults().catch(console.error);
 
 router.post('/download', async (req, res) => {
@@ -40,18 +38,22 @@ router.post('/download', async (req, res) => {
   }
 
   try {
-    // Sauvegarder l'URL dans la base de données
+    if (!cacheService.canProcessUrl(url)) {
+      return res.status(400).json({ 
+        message: 'La même url ne peut être traitée deux fois par le système'
+      });
+    }
+
+    cacheService.incrementUrlCount(url);
+
     await urlService.saveUrl(url);
 
-    // Créer une promesse pour ce téléchargement
     const resultPromise = new Promise((resolve) => {
       pendingResults.set(url, resolve);
     });
 
-    // Envoyer l'URL au crawler
     await sendToQueue('crawl_jobs', { url });
 
-    // Attendre le résultat avec un timeout de 5 minutes
     const result = await Promise.race([
       resultPromise,
       new Promise((_, reject) => 
@@ -80,7 +82,6 @@ router.post('/download', async (req, res) => {
   }
 });
 
-// Route pour télécharger le dossier en zip
 router.get('/download/:folderName', (req, res) => {
   const { folderName } = req.params;
   const folderPath = path.join(__dirname, '../../websites', folderName);
@@ -90,7 +91,7 @@ router.get('/download/:folderName', (req, res) => {
   }
 
   const archive = archiver('zip', {
-    zlib: { level: 9 } // Compression maximale
+    zlib: { level: 9 }
   });
 
   res.attachment(`${folderName}.zip`);

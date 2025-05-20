@@ -1,7 +1,7 @@
 <template>
   <div class="search-url">
     <h1>Web Crawler</h1>
-    <form @submit.prevent="startCrawling" class="form-container">
+    <form class="form-container">
       <div>
         <input 
           type="text" 
@@ -12,14 +12,17 @@
         />
       </div>
       <button 
-        type="submit" 
         class="submit-button"
+        @click="startCrawling"
         :disabled="isCrawling"
       >
         Start Crawling
       </button>
       <div v-if="isCrawling" class="loading">
         <p>Crawling in progress...</p>
+      </div>
+      <div v-if="error" class="error">
+        <p>{{ error }}</p>
       </div>
       <button 
         v-if="downloadFolder" 
@@ -38,12 +41,14 @@ import { ref } from 'vue';
 const url = ref('');
 const isCrawling = ref(false);
 const downloadFolder = ref('');
+const error = ref('');
 
 const startCrawling = async () => {
   if (url.value) {
     const crawlerUrl = `http://localhost:3000/api/crawler/download`;
     isCrawling.value = true;
-    downloadFolder.value = ''; // Reset download folder
+    error.value = '';
+    downloadFolder.value = '';
     try {
       const response = await fetch(crawlerUrl, {
         method: 'POST',
@@ -60,8 +65,9 @@ const startCrawling = async () => {
       }
 
       downloadFolder.value = data.folderName;
-    } catch (error) {
-      console.error('Error during crawling:', error);
+    } catch (err) {
+      console.error('Error during crawling:', err);
+      error.value = err.message;
     } finally {
       isCrawling.value = false;
     }
@@ -83,8 +89,10 @@ const downloadZip = async () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      url.value = '';
     } catch (error) {
       console.error('Error downloading zip:', error);
+      error.value = error.message;
     }
   }
 };
@@ -102,6 +110,11 @@ const downloadZip = async () => {
   margin-top: 1rem;
   font-size: 1.2rem;
   color: #3b82f6;
+}
+.error {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #ef4444;
 }
 .form-container {
   width: 100%;
