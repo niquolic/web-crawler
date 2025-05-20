@@ -1,0 +1,9 @@
+{
+  "name": "worker",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "uuid": "^9.0.0"
+  }
+}
