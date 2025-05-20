@@ -1,4 +1,4 @@
-import { consumeQueue } from './services/messaging.js';
+import { consumeQueue, sendToQueue } from './services/messaging.js';
 const fs = await import('fs/promises');
 const path = await import('path');
 import { fileURLToPath } from 'url';
@@ -17,6 +17,7 @@ consumeQueue('crawl_jobs', async (message) => {
 
   const id = uuidv4();
   const outputDir = path.join(__dirname, '../websites', `site-${id}`);
+  const folderName = `site-${id}`;
 
   try {
     await fs.mkdir(outputDir, { recursive: true });
@@ -24,11 +25,26 @@ consumeQueue('crawl_jobs', async (message) => {
     exec(cmd, async (err) => {
       if (err) {
         console.error('Crawl failed:', err);
+        await sendToQueue('crawl_results', { 
+          status: 'error',
+          url: url,
+          error: err.message
+        });
       } else {
         console.log(`Site downloaded to ${outputDir}`);
+        await sendToQueue('crawl_results', {
+          status: 'success',
+          url: url,
+          folderName: folderName
+        });
       }
     });
   } catch (err) {
     console.error('Error preparing crawler:', err);
+    await sendToQueue('crawl_results', {
+      status: 'error',
+      url: url,
+      error: err.message
+    });
   }
 });

@@ -21,6 +21,13 @@
       <div v-if="isCrawling" class="loading">
         <p>Crawling in progress...</p>
       </div>
+      <button 
+        v-if="downloadFolder" 
+        @click="downloadZip" 
+        class="download-button"
+      >
+        Télécharger le site
+      </button>
     </form>
   </div>
 </template>
@@ -30,23 +37,54 @@ import { ref } from 'vue';
 
 const url = ref('');
 const isCrawling = ref(false);
+const downloadFolder = ref('');
 
-const startCrawling = () => {
+const startCrawling = async () => {
   if (url.value) {
     const crawlerUrl = `http://localhost:3000/api/crawler/download`;
     isCrawling.value = true;
+    downloadFolder.value = ''; // Reset download folder
     try {
-      fetch(crawlerUrl, {
+      const response = await fetch(crawlerUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url: url.value }),
-      })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors du téléchargement');
+      }
+
+      downloadFolder.value = data.folderName;
     } catch (error) {
       console.error('Error during crawling:', error);
     } finally {
       isCrawling.value = false;
+    }
+  }
+};
+
+const downloadZip = async () => {
+  if (downloadFolder.value) {
+    try {
+      const response = await fetch(`http://localhost:3000/api/crawler/download/${downloadFolder.value}`);
+      if (!response.ok) throw new Error('Erreur lors du téléchargement du zip');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${downloadFolder.value}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading zip:', error);
     }
   }
 };
@@ -87,7 +125,7 @@ const startCrawling = () => {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
 
-.submit-button {
+.submit-button, .download-button {
   width: 100%;
   padding: 0.5rem 1rem;
   background-color: #3b82f6;
@@ -96,9 +134,18 @@ const startCrawling = () => {
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 1rem;
 }
 
-.submit-button:hover {
+.submit-button:hover, .download-button:hover {
   background-color: #2563eb;
+}
+
+.download-button {
+  background-color: #10b981;
+}
+
+.download-button:hover {
+  background-color: #059669;
 }
 </style>
