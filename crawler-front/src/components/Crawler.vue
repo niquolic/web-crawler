@@ -1,7 +1,7 @@
 <template>
   <div class="search-url">
     <h1>Web Crawler</h1>
-    <form class="form-container">
+    <form @submit.prevent class="form-container">
       <div>
         <input 
           type="text" 
@@ -12,6 +12,7 @@
         />
       </div>
       <button 
+        type="button"
         class="submit-button"
         @click="startCrawling"
         :disabled="isCrawling"
@@ -26,7 +27,8 @@
       </div>
       <button 
         v-if="downloadFolder" 
-        @click="downloadZip" 
+        type="button"
+        @click.prevent="downloadZip" 
         class="download-button"
       >
         Télécharger le site
@@ -81,18 +83,18 @@ const downloadZip = async () => {
       if (!response.ok) throw new Error('Erreur lors du téléchargement du zip');
       
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = downloadUrl;
       a.download = `${downloadFolder.value}.zip`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
       url.value = '';
-    } catch (error) {
-      console.error('Error downloading zip:', error);
-      error.value = error.message;
+    } catch (err) {
+      console.error('Error downloading zip:', err);
+      error.value = err.message;
     }
   }
 };

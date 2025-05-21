@@ -1,24 +1,74 @@
-version: '3'
+version: '3.8'
+
 services:
-  api:
-    build: ./api
-    ports:
-      - "3000:3000"
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq
-
-  worker1:
-    build: ./worker
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq
-
-  worker2:
-    build: ./worker
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq
-
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=test
+
+  api:
+    build: 
+      context: ./crawler-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - MONGODB_URI=mongodb://mongodb:27017/test
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    volumes:
+      - ./websites:/app/websites
+
+  frontend:
+    build:
+      context: ./crawler-front
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - api
+
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    deploy:
+      replicas: 2
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./websites:/app/websites
+
+volumes:
+  rabbitmq_data:
+  mongodb_data:

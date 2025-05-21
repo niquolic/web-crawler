@@ -16,7 +16,7 @@ consumeQueue('crawl_jobs', async (message) => {
   const { v4: uuidv4 } = await import('uuid');
 
   const id = uuidv4();
-  const outputDir = path.join(__dirname, '../websites', `site-${id}`);
+  const outputDir = path.join('/app/websites', `site-${id}`);
   const folderName = `site-${id}`;
 
   try {
