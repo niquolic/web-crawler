@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projectcrawler-api
+  labels:
+    env: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: projectcrawler-api
+  template:
+    metadata:
+      labels:
+        app: projectcrawler-api
+    spec:
+      containers:
+      - name: projectcrawler-api
+        image: projectcrawler-api:1.0.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://guest:guest@rabbitmq:5672"
+        - name: WEBSITES_PATH
+          value: "/app/websites"
+        volumeMounts:
+        - name: websites-volume
+          mountPath: /app/websites
+      volumes:
+      - name: websites-volume
+        persistentVolumeClaim:
+          claimName: websites-pvc

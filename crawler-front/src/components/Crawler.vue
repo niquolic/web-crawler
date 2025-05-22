@@ -47,7 +47,7 @@ const error = ref('');
 
 const startCrawling = async () => {
   if (url.value) {
-    const crawlerUrl = `http://localhost:3000/api/crawler/download`;
+    const crawlerUrl = `${import.meta.env.VITE_API_URL}/api/crawler/download`;
     isCrawling.value = true;
     error.value = '';
     downloadFolder.value = '';
@@ -79,7 +79,7 @@ const startCrawling = async () => {
 const downloadZip = async () => {
   if (downloadFolder.value) {
     try {
-      const response = await fetch(`http://localhost:3000/api/crawler/download/${downloadFolder.value}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/crawler/download/${downloadFolder.value}`);
       if (!response.ok) throw new Error('Erreur lors du téléchargement du zip');
       
       const blob = await response.blob();

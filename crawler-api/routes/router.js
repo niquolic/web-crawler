@@ -84,7 +84,8 @@ router.post('/download', async (req, res) => {
 
 router.get('/download/:folderName', (req, res) => {
   const { folderName } = req.params;
-  const folderPath = path.join('/app/websites', folderName);
+  const websitesPath = process.env.WEBSITES_PATH || '/app/websites';
+  const folderPath = path.join(websitesPath, folderName);
 
   if (!fs.existsSync(folderPath)) {
     return res.status(404).json({ message: 'Dossier non trouvé' });

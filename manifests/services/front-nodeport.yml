@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-nodeport
+  namespace: dev
+spec:
+  selector:
+    app: projectcrawler-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5173
+      nodePort: 30081
+  type: NodePort

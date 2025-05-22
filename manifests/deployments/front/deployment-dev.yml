@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projectcrawler-frontend
+  labels:
+    env: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: projectcrawler-frontend
+  template:
+    metadata:
+      labels:
+        app: projectcrawler-frontend
+    spec:
+      containers:
+      - name: projectcrawler-frontend
+        image: projectcrawler-frontend:1.0.0
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_API_URL
+          value: "http://dev.projectcrawler.com"

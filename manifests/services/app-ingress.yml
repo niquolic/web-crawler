@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+  - host: dev.projectcrawler.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: front-nodeport
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-nodeport
+            port:
+              number: 80
+      - path: /crawler
+        pathType: Prefix
+        backend:
+          service:
+            name: crawler-nodeport
+            port:
+              number: 80

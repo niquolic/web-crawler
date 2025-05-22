@@ -15,6 +15,6 @@ app.use(bodyParser.json());
 
 app.use('/api/crawler', serviceRoutes);
 
-app.listen(PORT, () => {
-  console.log(`API Gateway démarrée sur http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API Gateway démarrée sur http://0.0.0.0:${PORT}`);
 });
