@@ -38,11 +38,11 @@ router.post('/download', async (req, res) => {
   }
 
   try {
-    if (!cacheService.canProcessUrl(url)) {
-      return res.status(400).json({ 
-        message: 'La même url ne peut être traitée deux fois par le système'
-      });
-    }
+    // if (!cacheService.canProcessUrl(url)) {
+    //   return res.status(400).json({ 
+    //     message: 'La même url ne peut être traitée deux fois par le système'
+    //   });
+    // }
 
     cacheService.incrementUrlCount(url);
 
@@ -84,7 +84,7 @@ router.post('/download', async (req, res) => {
 
 router.get('/download/:folderName', (req, res) => {
   const { folderName } = req.params;
-  const websitesPath = process.env.WEBSITES_PATH || '/app/websites';
+  const websitesPath = process.env.WEBSITES_PATH || '../websites';
   const folderPath = path.join(websitesPath, folderName);
 
   if (!fs.existsSync(folderPath)) {
