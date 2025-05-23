@@ -38,13 +38,12 @@ router.post('/download', async (req, res) => {
   }
 
   try {
-    // if (!cacheService.canProcessUrl(url)) {
-    //   return res.status(400).json({ 
-    //     message: 'La même url ne peut être traitée deux fois par le système'
-    //   });
-    // }
-
-    cacheService.incrementUrlCount(url);
+    // Vérifier si l'URL est valide
+    try {
+      new URL(url);
+    } catch (e) {
+      return res.status(400).json({ message: 'URL invalide.' });
+    }
 
     await urlService.saveUrl(url);
 
@@ -57,11 +56,12 @@ router.post('/download', async (req, res) => {
     const result = await Promise.race([
       resultPromise,
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 300000)
+        setTimeout(() => reject(new Error('Le crawler n\'a pas répondu dans le délai imparti')), 3000000)
       )
     ]);
 
     if (result.status === 'error') {
+      console.error('Erreur du crawler:', result.error);
       return res.status(500).json({ 
         message: "Erreur lors du téléchargement du site.",
         error: result.error 
@@ -74,6 +74,7 @@ router.post('/download', async (req, res) => {
       folderName: result.folderName
     });
   } catch (error) {
+    console.error('Erreur lors du traitement de la requête:', error);
     pendingResults.delete(url);
     res.status(500).json({ 
       message: "Erreur lors de l'envoi du site au crawler.",

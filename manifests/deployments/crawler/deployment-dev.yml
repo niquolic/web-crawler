@@ -20,6 +20,8 @@ spec:
         env:
         - name: RABBITMQ_URL
           value: "amqp://guest:guest@rabbitmq:5672"
+        - name: WEBSITES_PATH
+          value: "/app/websites"
         volumeMounts:
         - name: websites-volume
           mountPath: /app/websites

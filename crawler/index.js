@@ -38,7 +38,16 @@ consumeQueue('crawl_jobs', async (message) => {
 async function crawlSite(startUrl, outputDir) {
   const visited = new Set();
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu'
+    ]
+  });
   const page = await browser.newPage();
 
   await fs.mkdir(outputDir, { recursive: true });
@@ -63,7 +72,7 @@ async function crawlSite(startUrl, outputDir) {
       const links = $('a[href]')
         .map((_, el) => $(el).attr('href'))
         .get()
-        .filter(href => href && href.startsWith('/') || href.startsWith(startUrl)) // Liens internes
+        .filter(href => href && (href.startsWith('/') || href.startsWith(startUrl))) // Liens internes
         .map(href => (href.startsWith('/') ? new URL(href, startUrl).href : href));
 
       for (const link of links) {

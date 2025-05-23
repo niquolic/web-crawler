@@ -22,6 +22,8 @@ spec:
         env:
         - name: RABBITMQ_URL
           value: "amqp://guest:guest@rabbitmq:5672"
+        - name: MONGO_URI
+          value: "mongodb://mongodb:27017/crawler"
         - name: WEBSITES_PATH
           value: "/app/websites"
         volumeMounts:
