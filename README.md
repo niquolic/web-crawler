@@ -32,14 +32,20 @@ Il y a deux façons de lancer le projet :
    minikube tunnel
    ```
 6. Pour voir les logs de l'application, se rendre sur `https://dev.projectcrawler.com/kibana`
-    Puis aller dans Stack Management -> Index Patterns -> Create index pattern
-    Nommer le pattern 'node-logs-*'
-    Mettre le Time field sur '@timestamp' puis cliquer sur Create index pattern
-    Aller sur le menu Discover et les logs apparaîtront
+   Puis aller dans Stack Management -> Index Patterns -> Create index pattern
+   Nommer le pattern 'node-logs-*'
+   Mettre le Time field sur '@timestamp' puis cliquer sur Create index pattern
+   Aller sur le menu Discover et les logs apparaîtront
 Le script peut prendre du temps à s'exécuter, notamment la commande pour activer le module ingress, et certaines commandes peuvent tomber en erreur.
 Pour supprimer le projet après utilisation, lancer le script de reset :
    ```bash
    ./reset.sh
+   ```
+Si un service retourne une erreur 502 ou que le site téléchargé ne remonte pas au front, faire un rollout des déploiements front/api/crawler:
+   ```
+   kubectl rollout restart -n dev deployment projectcrawler-frontend
+   kubectl rollout restart -n dev deployment projectcrawler-api
+   kubectl rollout restart -n dev deployment projectcrawler-crawler
    ```
 
 ## 2-> Faire les commandes manuellement
