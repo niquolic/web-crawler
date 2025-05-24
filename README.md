@@ -7,8 +7,8 @@
 
 ## Installation et déploiement
 
-Il y à deux façons de lancer le projet :
-## 1: Script
+Il y a deux façons de lancer le projet :
+## 1-> Script
 1. Ouvrir un terminal à la racine du projet
 2. Exécuter ces commandes :
    ```bash
@@ -42,7 +42,7 @@ Pour supprimer le projet après utilisation, lancer le script de reset :
    ./reset.sh
    ```
 
-## 2: Faire les commandes manuellement
+## 2-> Faire les commandes manuellement
 1. Ouvrir un terminal à la racine du projet et exécuter ces commandes pour créer les images Docker (Docker doit être ouvert) :
    ```bash
    cd crawler-front
