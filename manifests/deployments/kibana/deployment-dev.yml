@@ -21,3 +21,5 @@ spec:
         env:
         - name: ELASTICSEARCH_HOSTS
           value: "http://elasticsearch:9200"
+        - name: SERVER_BASEPATH
+          value: "/kibana"

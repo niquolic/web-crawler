@@ -7,30 +7,59 @@
 
 ## Installation et déploiement
 
-1. Se placer dans le projet crawler-front et exécuter la commande :
+Il y à deux façons de lancer le projet :
+## 1: Script
+1. Ouvrir un terminal à la racine du projet
+2. Exécuter ces commandes :
    ```bash
+   chmod +x start.sh
+   chmod +x reset.sh
+   ```
+3. Exécuter le script de démarrage avec cette commande : 
+   ```bash
+   ./start.sh
+   ```
+4. Si c'est la première utilisation, configurer le fichier hosts :
+   ```bash
+   sudo nano /etc/hosts
+   ```
+   Ajouter la ligne :
+   ```
+   127.0.0.1 dev.projectcrawler.com
+   ```
+5. Démarrer le tunnel Minikube (entrer le mot de passe si nécessaire) :
+   ```bash
+   minikube tunnel
+   ```
+6. Pour voir les logs de l'application, se rendre sur `https://dev.projectcrawler.com/kibana`
+    Puis aller dans Stack Management -> Index Patterns -> Create index pattern
+    Nommer le pattern 'node-logs-*'
+    Mettre le Time field sur '@timestamp' puis cliquer sur Create index pattern
+    Aller sur le menu Discover et les logs apparaîtront
+Le script peut prendre du temps à s'exécuter, notamment la commande pour activer le module ingress, et certaines commandes peuvent tomber en erreur.
+Pour supprimer le projet après utilisation, lancer le script de reset :
+   ```bash
+   ./reset.sh
+   ```
+
+## 2: Faire les commandes manuellement
+1. Ouvrir un terminal à la racine du projet et exécuter ces commandes pour créer les images Docker (Docker doit être ouvert) :
+   ```bash
+   cd crawler-front
    docker build -t projectcrawler-frontend:1.0.0 .
-   ```
-
-2. Se placer dans le projet crawler-api et exécuter la commande :
-   ```bash
+   cd ../crawler-api
    docker build -t projectcrawler-api:1.0.0 .
-   ```
-
-3. Se placer dans le projet crawler et exécuter la commande :
-   ```bash
+   cd ../crawler
    docker build -t projectcrawler-crawler:1.0.0 .
    ```
 
-4. Se placer dans le dossier manifests
-
-5. Démarrer Minikube :
+2. Démarrer Minikube :
    ```bash
    minikube start --driver=docker --profile=projectcrawler
    minikube profile projectcrawler
    ```
 
-6. Charger les images Docker dans Minikube :
+3. Charger les images Docker dans Minikube :
    ```bash
    # Activer le daemon Docker de Minikube
    eval $(minikube docker-env)
@@ -47,25 +76,25 @@
    eval $(minikube docker-env -u)
    ```
 
-7. Créer le namespace :
+4. Créer le namespace :
    ```bash
    cd ../manifests
    kubectl apply -f namespaces/namespace-dev.yml
    ```
 
-8. Créer le volume partagé :
+5. Créer le volume partagé :
    ```bash
    kubectl apply -f storage/websites-pvc.yml -n dev
    ```
 
-9. Déployer MongoDB (base de données) :
+6. Déployer MongoDB (base de données) :
    ```bash
    kubectl apply -f storage/mongodb-pvc.yml -n dev
    kubectl apply -f deployments/mongodb/deployment-dev.yml -n dev
    kubectl apply -f services/mongodb-service.yml -n dev
    ```
 
-10. Déployer ElasticSearch et Kibana : 
+7. Déployer ElasticSearch et Kibana : 
    ```bash
    kubectl apply -f deployments/elasticsearch/deployment-dev.yml -n dev
    kubectl apply -f services/elasticsearch-nodeport.yml -n dev
@@ -73,7 +102,7 @@
    kubectl apply -f services/kibana-service.yml -n dev
    ```
 
-11. Déployer les autres services :
+8. Déployer les autres services :
     ```bash
     kubectl apply -f deployments/front/deployment-dev.yml -n dev
     kubectl apply -f deployments/api/deployment-dev.yml -n dev
@@ -82,16 +111,17 @@
     kubectl apply -f deployments/crawler/deployment-dev.yml -n dev
     ```
 
-12. Configurer l'Ingress :
+9. Configurer l'Ingress :
     ```bash
     minikube addons enable ingress
     kubectl apply -f services/api-nodeport.yml -n dev
     kubectl apply -f services/crawler-nodeport.yml -n dev
     kubectl apply -f services/front-nodeport.yml -n dev
     kubectl apply -f services/app-ingress.yml -n dev
+    kubectl apply -f services/kibana-ingress.yml -n dev
     ```
 
-13. Configurer le fichier hosts :
+10. Configurer le fichier hosts :
     ```bash
     sudo nano /etc/hosts
     ```
@@ -100,13 +130,16 @@
     127.0.0.1 dev.projectcrawler.com
     ```
 
-14. Démarrer le tunnel Minikube (entrer le mot de passe si nécessaire) :
+11. Démarrer le tunnel Minikube (entrer le mot de passe si nécessaire) :
     ```bash
     minikube tunnel
     ```
 
-15. Accéder à l'application :
+12. Accéder à l'application :
     Ouvrir votre navigateur et aller sur `http://dev.projectcrawler.com`
 
-16. Pour voir les logs de l'application, se rendre sur `http://dev.projectcrawler.com/kibana`
-    Puis aller dans Stack Management -> indexPatterns
+13. Pour voir les logs de l'application, se rendre sur `https://dev.projectcrawler.com/kibana`
+    Puis aller dans Stack Management -> Index Patterns -> Create index pattern
+    Nommer le pattern 'node-logs-*'
+    Mettre le Time field sur '@timestamp' puis cliquer sur Create index pattern
+    Aller sur le menu Discover et les logs apparaîtront

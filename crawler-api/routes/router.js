@@ -57,7 +57,7 @@ router.post('/download', async (req, res) => {
     const resultPromise = new Promise((resolve) => {
       pendingResults.set(url, resolve);
     });
-
+    
     await sendToQueue('crawl_jobs', { url });
 
     const result = await Promise.race([

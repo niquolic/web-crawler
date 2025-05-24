@@ -91,6 +91,7 @@ const downloadZip = async () => {
       a.click();
       window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
+      downloadFolder.value = '';
       url.value = '';
     } catch (err) {
       console.error('Error downloading zip:', err);
@@ -154,6 +155,12 @@ const downloadZip = async () => {
 
 .submit-button:hover, .download-button:hover {
   background-color: #2563eb;
+}
+
+.submit-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .download-button {
