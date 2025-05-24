@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const connectDB = require('./db');
 const serviceRoutes = require('./routes/router');
 const cors = require('cors');
+const logger = require('./services/logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,5 +17,5 @@ app.use(bodyParser.json());
 app.use('/api/crawler', serviceRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API Gateway démarrée sur http://0.0.0.0:${PORT}`);
+  logger.info(`API Gateway démarrée sur http://0.0.0.0:${PORT}`);
 });

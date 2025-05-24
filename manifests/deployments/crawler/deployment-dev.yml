@@ -22,6 +22,8 @@ spec:
           value: "amqp://guest:guest@rabbitmq:5672"
         - name: WEBSITES_PATH
           value: "/app/websites"
+        - name: ELASTICSEARCH_URL
+          value: "http://elasticsearch.dev.svc.cluster.local:9200"
         volumeMounts:
         - name: websites-volume
           mountPath: /app/websites

@@ -28,3 +28,17 @@ spec:
             name: crawler-nodeport
             port:
               number: 80
+      - path: /kibana
+        pathType: Prefix
+        backend:
+          service:
+            name: kibana
+            port:
+              number: 5601
+      - path: /es
+        pathType: Prefix
+        backend:
+          service:
+            name: elasticsearch
+            port:
+              number: 9200

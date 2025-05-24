@@ -5,12 +5,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import { load } from 'cheerio';
 import 'dotenv/config';
+import logger from './services/logger.js';
 
-console.log('[Crawler]: Started..');
-
+logger.info('[Crawler]: Started..');
 consumeQueue('crawl_jobs', async (message) => {
   const url = message.url.toString();
-  console.log('[Crawler]: Received message:', url);
+  logger.info('[Crawler]: Received message:', url);
 
   const id = uuidv4();
   const folderName = `site-${id}`;
@@ -19,14 +19,14 @@ consumeQueue('crawl_jobs', async (message) => {
   try {
     await crawlSite(url, outputDir);
 
-    console.log(`[Crawler]:✅ Site downloaded to ${outputDir}`);
+    logger.info(`[Crawler]:✅ Site downloaded to ${outputDir}`);
     await sendToQueue('crawl_results', {
       status: 'success',
       url,
       folderName,
     });
   } catch (err) {
-    console.error('[Crawler]: ❌ Crawl failed:', err);
+    logger.error('[Crawler]: ❌ Crawl failed:', err);
     await sendToQueue('crawl_results', {
       status: 'error',
       url,
@@ -56,7 +56,7 @@ async function crawlSite(startUrl, outputDir) {
     if (visited.has(url) || depth > 2) return;
     visited.add(url);
 
-    console.log(`[Crawler]: Crawling: ${url}`);
+    logger.info(`[Crawler]: Crawling: ${url}`);
 
     try {
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });

@@ -7,6 +7,7 @@ const amqplib = require('amqplib');
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
+const logger = require('../services/logger');
 
 const pendingResults = new Map();
 
@@ -38,7 +39,6 @@ router.post('/download', async (req, res) => {
   }
 
   try {
-    // Vérifier si l'URL est valide
     try {
       new URL(url);
     } catch (e) {
@@ -46,6 +46,13 @@ router.post('/download', async (req, res) => {
     }
 
     await urlService.saveUrl(url);
+
+    if (!cacheService.canProcessUrl(url)) {
+      return res.status(400).json({ 
+        message: 'La même url ne peut être traitée deux fois par le système'
+      });
+    }
+    cacheService.incrementUrlCount(url);
 
     const resultPromise = new Promise((resolve) => {
       pendingResults.set(url, resolve);
@@ -61,7 +68,7 @@ router.post('/download', async (req, res) => {
     ]);
 
     if (result.status === 'error') {
-      console.error('Erreur du crawler:', result.error);
+      logger.error('Erreur du crawler:', result.error);
       return res.status(500).json({ 
         message: "Erreur lors du téléchargement du site.",
         error: result.error 
@@ -74,7 +81,7 @@ router.post('/download', async (req, res) => {
       folderName: result.folderName
     });
   } catch (error) {
-    console.error('Erreur lors du traitement de la requête:', error);
+    logger.error('Erreur lors du traitement de la requête:', error);
     pendingResults.delete(url);
     res.status(500).json({ 
       message: "Erreur lors de l'envoi du site au crawler.",

@@ -49,6 +49,7 @@
 
 7. Créer le namespace :
    ```bash
+   cd ../manifests
    kubectl apply -f namespaces/namespace-dev.yml
    ```
 
@@ -63,9 +64,16 @@
    kubectl apply -f deployments/mongodb/deployment-dev.yml -n dev
    kubectl apply -f services/mongodb-service.yml -n dev
    ```
-   > MongoDB sera accessible pour les autres services du cluster à l'adresse : `mongodb://mongodb:27017/crawler`
 
-10. Déployer les autres services :
+10. Déployer ElasticSearch et Kibana : 
+   ```bash
+   kubectl apply -f deployments/elasticsearch/deployment-dev.yml -n dev
+   kubectl apply -f services/elasticsearch-nodeport.yml -n dev
+   kubectl apply -f deployments/kibana/deployment-dev.yml -n dev
+   kubectl apply -f services/kibana-service.yml -n dev
+   ```
+
+11. Déployer les autres services :
     ```bash
     kubectl apply -f deployments/front/deployment-dev.yml -n dev
     kubectl apply -f deployments/api/deployment-dev.yml -n dev
@@ -74,7 +82,7 @@
     kubectl apply -f deployments/crawler/deployment-dev.yml -n dev
     ```
 
-11. Configurer l'Ingress :
+12. Configurer l'Ingress :
     ```bash
     minikube addons enable ingress
     kubectl apply -f services/api-nodeport.yml -n dev
@@ -83,7 +91,7 @@
     kubectl apply -f services/app-ingress.yml -n dev
     ```
 
-12. Configurer le fichier hosts :
+13. Configurer le fichier hosts :
     ```bash
     sudo nano /etc/hosts
     ```
@@ -92,10 +100,13 @@
     127.0.0.1 dev.projectcrawler.com
     ```
 
-13. Démarrer le tunnel Minikube :
+14. Démarrer le tunnel Minikube (entrer le mot de passe si nécessaire) :
     ```bash
     minikube tunnel
     ```
 
-14. Accéder à l'application :
+15. Accéder à l'application :
     Ouvrir votre navigateur et aller sur `http://dev.projectcrawler.com`
+
+16. Pour voir les logs de l'application, se rendre sur `http://dev.projectcrawler.com/kibana`
+    Puis aller dans Stack Management -> indexPatterns

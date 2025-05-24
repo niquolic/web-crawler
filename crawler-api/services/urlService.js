@@ -1,4 +1,5 @@
 const db = require('../db');
+const logger = require('./logger');
 
 const urlService = {
   async saveUrl(url) {
@@ -12,7 +13,7 @@ const urlService = {
       await urls.insertOne(urlToSave);
       return urlToSave;
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de l\'URL:', error);
+      logger.error('Erreur lors de la sauvegarde de l\'URL:', error);
       throw error;
     }
   }
